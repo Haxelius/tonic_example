@@ -1,7 +1,7 @@
 use tonic::{Request, Response, Status, transport::Server};
 
 use file_transfer::file_transfer_server::{FileTransfer, FileTransferServer};
-use file_transfer::{FileReply, FileRequest};
+use file_transfer::{FileReply, FileRequest, NoFileRequest};
 
 pub mod file_transfer {
     include!("../proto/output/file_transfer.rs");
@@ -19,6 +19,15 @@ impl FileTransfer for MyFileTransfer {
     ) -> Result<Response<FileReply>, Status> {
         let data = std::fs::read(request.into_inner().filename)
             .map_err(|err| Status::from_error(Box::new(err)))?;
+        let reply = FileReply { data };
+        Ok(Response::new(reply))
+    }
+
+    async fn default_file(
+        &self,
+        _request: Request<NoFileRequest>,
+    ) -> Result<Response<FileReply>, Status> {
+        let data = std::fs::read("./build.rs").map_err(|err| Status::from_error(Box::new(err)))?;
         let reply = FileReply { data };
         Ok(Response::new(reply))
     }
