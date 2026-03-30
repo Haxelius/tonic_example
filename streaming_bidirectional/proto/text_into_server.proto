@@ -1,0 +1,6 @@
+syntax = "proto3";
+package bi_stream;
+
+message TextIntoServer {
+  string text = 1;
+}

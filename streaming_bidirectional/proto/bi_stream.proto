@@ -1,0 +1,9 @@
+syntax = "proto3";
+package bi_stream;
+
+import "text_into_server.proto";
+import "text_out_of_server.proto";
+
+service BiStream {
+  rpc ShareText(stream TextIntoServer) returns (stream TextOutOfServer);
+}

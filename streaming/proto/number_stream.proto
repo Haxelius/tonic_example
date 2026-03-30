@@ -1,0 +1,30 @@
+syntax = "proto3";
+package number_stream;
+
+service NumberStream {
+  rpc NumberStreamRpc (NumberStreamRequest) returns (stream Number);
+}
+
+message NumberStreamRequest {
+
+}
+
+enum NumberType {
+  NUMBER_TYPE_UNSPECIFIED = 0;
+  NUMBER_TYPE_SECONDS_PASSED = 1;
+  NUMBER_TYPE_USER_INPUT = 2;
+}
+
+message Number {
+  message UserInputMessage {
+    uint32 number = 1;
+  }
+  message SecondsPassedMessage {
+    uint32 number = 1;
+  }
+  oneof Type {
+    UserInputMessage user_input = 1;
+    SecondsPassedMessage seconds_passed = 2;
+  }
+}
+
