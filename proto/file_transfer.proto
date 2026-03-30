@@ -3,6 +3,10 @@ package file_transfer;
 
 service FileTransfer {
   rpc RequestFile (FileRequest) returns (FileReply);
+  rpc DefaultFile (NoFileRequest) returns (FileReply);
+}
+
+message NoFileRequest {
 }
 
 message FileRequest {

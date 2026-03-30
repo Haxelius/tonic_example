@@ -1,8 +1,9 @@
-use std::io::Write;
+use std::{io::Write, sync::OnceLock};
 
 use file_transfer::file_transfer_client::FileTransferClient;
+use tonic::transport::Channel;
 
-use crate::file_transfer::FileRequest;
+use crate::file_transfer::{FileRequest, NoFileRequest};
 pub mod file_transfer {
     include!("../proto/output/file_transfer.rs");
 }
@@ -30,6 +31,7 @@ async fn cat_remote(filename: impl Into<String>) -> Result<(), Box<dyn std::erro
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let mut client = FileTransferClient::connect("http://[::1]:50051").await?;
     loop {
         let mut input = String::new();
         println!("enter file to view: ");
@@ -39,14 +41,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         println!("{:?}", input);
 
-        if input == *"" {
-            break;
-        }
+        match input.as_str() {
+            "" => {
+                let response = client.default_file(NoFileRequest {}).await?;
 
-        match cat_remote(input).await {
-            Ok(_) => (),
-            Err(err) => println!("{}", err),
-        }
+                let data_vec = response.into_inner().data;
+
+                std::io::stdout().write_all((*data_vec).into())?;
+            }
+            _ => match cat_remote(input).await {
+                Ok(_) => (),
+                Err(err) => println!("{}", err),
+            },
+        };
     }
     Ok(())
 }
